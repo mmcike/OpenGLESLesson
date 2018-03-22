@@ -2,6 +2,7 @@ package com.lbh.lesson.gles.lesson1;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import com.lbh.lesson.gles.util.OpenGlUtils;
 
@@ -18,7 +19,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class TriangleRender implements GLSurfaceView.Renderer {
     private static final String VERTEX_SHADER =
-            "//根据所设置的顶点数据而插值后的顶点坐标\n" +
+            "//根据所设置的顶点数据，此时未插值，插值计算发生在光栅化阶段\n" +
                     "attribute vec4 vPosition;" +
                     "void main() {" +
                     "//设置最终坐标\n" +
@@ -102,7 +103,7 @@ public class TriangleRender implements GLSurfaceView.Renderer {
                 VERTEX_STRID, mVertexBuffer);
 
         //绑定颜色数据
-        GLES20.glUniform4fv(mColorId, 1, TRIANGLE_COORDS, 0);
+        GLES20.glUniform4fv(mColorId, 1, COLOR, 0);
 
         //绘制三角形
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, VERTEX_COUNT);
