@@ -180,6 +180,9 @@ public class TextureRender implements GLSurfaceView.Renderer {
     }
 
     public void destroy() {
+        if (mTextureId[0] != OpenGLUtil.NO_TEXTURE) {
+            GLES20.glDeleteTextures(1, mTextureId,0);
+        }
         GLES20.glDeleteProgram(mProgramId);
     }
 }
