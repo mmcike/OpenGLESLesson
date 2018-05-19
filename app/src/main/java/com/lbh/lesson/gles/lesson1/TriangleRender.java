@@ -2,9 +2,8 @@ package com.lbh.lesson.gles.lesson1;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 
-import com.lbh.lesson.gles.util.OpenGlUtils;
+import com.lbh.lesson.gles.util.OpenGLUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -53,7 +52,7 @@ public class TriangleRender implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         //编译着色器并链接顶点与片元着色器生成OpenGL程序句柄
-        mProgramId = OpenGlUtils.loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+        mProgramId = OpenGLUtil.loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
         //通过OpenGL程序句柄查找获取顶点着色器中的位置句柄
         mPositionId = GLES20.glGetAttribLocation(mProgramId, "vPosition");
         //通过OpenGL程序句柄查找获取片元着色器中的颜色句柄

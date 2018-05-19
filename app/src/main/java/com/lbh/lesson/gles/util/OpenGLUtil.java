@@ -23,9 +23,10 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public class OpenGlUtils {
+public class OpenGLUtil {
     public static final int NO_TEXTURE = -1;
 
     public static int loadTexture(final Bitmap img, final int usedTexId) {

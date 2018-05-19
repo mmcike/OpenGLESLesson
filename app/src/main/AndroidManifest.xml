@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".lesson1.TriangleActivity"></activity>
+        <activity android:name=".lesson2.TextureActivity"></activity>
     </application>
 
 </manifest>
