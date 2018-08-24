@@ -42,18 +42,21 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
                     "varying vec2 textureCoordinate;\n" +
                     "//用户传入的纹理数据\n" +
                     "uniform sampler2D inputImageTexture;\n" +
+                    "uniform sampler2D inputImageTexture2;\n" +
                     "void main() {" +
-                    "//该片元最终颜色值\n" +
-                    "  gl_FragColor = texture2D(inputImageTexture, textureCoordinate);" +
+                    "//该片元最终颜色值，80%的inputImageTexture，20%的inputImageTexture2\n" +
+                    "  gl_FragColor = mix(texture2D(inputImageTexture, textureCoordinate), " +
+                    "texture2D(inputImageTexture2, textureCoordinate), 0.2);" +
                     "}";
 
 
     private int mProgramId; //GL程序对象句柄
     private int mPositionId; //顶点位置句柄
     private int mTexture; //纹理句柄
+    private int mTexture2; //纹理2句柄
     private int mInputTextureCoordinate; //纹理坐标句柄
 
-    private int[] mTextureId = new int[]{OpenGLUtil.NO_TEXTURE}; //用于绘制的纹理ID
+    private int[] mTextureId = new int[]{OpenGLUtil.NO_TEXTURE, OpenGLUtil.NO_TEXTURE}; //用于绘制的纹理ID
 
     private FloatBuffer mVertexBuffer; //顶点坐标数据
     private FloatBuffer mTextureBuffer; //纹理坐标数据
@@ -84,6 +87,7 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
         mTransformMatrixId = GLES20.glGetUniformLocation(mProgramId, "transform");
         //通过OpenGL程序句柄查找获取片元着色器中的纹理句柄
         mTexture = GLES20.glGetUniformLocation(mProgramId, "inputImageTexture");
+        mTexture2 = GLES20.glGetUniformLocation(mProgramId, "inputImageTexture2");
 
         //获取顶点数据
         mVertexBuffer = CoordinateUtil.getVertexCoord();
@@ -93,7 +97,8 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
         mTextureBuffer = CoordinateUtil.getTextureVerticalFlipCoord();
 
         //加载纹理
-        loadTexture();
+        loadTexture(0, "container.jpg");
+        loadTexture(1, "awesomeface.png");
     }
 
     @Override
@@ -108,7 +113,7 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl10) {
         //这里网上很多博客说是设置背景色，其实更严格来说是通过所设置的颜色来清空颜色缓冲区，改变背景色只是其作用之一
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);//白色不透明
+        GLES20.glClearColor(00.0f, 0.0f, 0.0f, 1.0f);//黑色不透明
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         //告知OpenGL所要使用的Program
@@ -138,12 +143,19 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
         //绑定变换矩阵
         GLES20.glUniformMatrix4fv(mTransformMatrixId, 1, false, mTransformMatrix, 0);
 
-        //将纹理对象设置到0号单元上
-        GLES20.glUniform1i(mTexture, 0);
         //激活GL_TEXTURE0，该纹理单元默认激活
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         //绑定纹理数据到GL_TEXTURE0纹理单元上
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[0]);
+        //将纹理对象设置到0号单元上
+        GLES20.glUniform1i(mTexture, 0);
+
+        //激活GL_TEXTURE1，该纹理单元默认激活
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        //绑定纹理数据到GL_TEXTURE1纹理单元上
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[1]);
+        //将纹理对象设置到1号单元上
+        GLES20.glUniform1i(mTexture2, 1);
 
         //使用GL_TRIANGLE_FAN方式绘制纹理
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, CoordinateUtil.VERTEX_COUNT);
@@ -156,15 +168,15 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
-    private void loadTexture() {
+    private void loadTexture(int index, String bitmapName) {
         //生成原始纹理图片
-        Bitmap texture = getTextureBitmap();
-        if (mTextureId[0] == OpenGLUtil.NO_TEXTURE) {
+        Bitmap texture = getTextureBitmap(bitmapName);
+        if (mTextureId[index] == OpenGLUtil.NO_TEXTURE) {
             //若尚未创建过纹理对象
             //创建一个纹理对象，存放于mTextureId数组内
-            GLES20.glGenTextures(1, mTextureId, 0);
+            GLES20.glGenTextures(1, mTextureId, index);
             //将该纹理绑定到GL_TEXTURE_2D目标，代表这是一个二维纹理
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[0]);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[index]);
             //设置其放大缩小滤波方式
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                     GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
@@ -180,7 +192,7 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
             GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture, 0);
         } else {
             //若创建过纹理对象，则重复利用
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[0]);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[index]);
             //更新已存在的纹理对象中的纹理数据
             GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, texture);
         }
@@ -188,8 +200,8 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
         texture.recycle();
     }
 
-    private Bitmap getTextureBitmap() {
-        return ImageUtil.getBitmapFromAssets(mContext, "cat.png");
+    private Bitmap getTextureBitmap(String bitmapName) {
+        return ImageUtil.getBitmapFromAssets(mContext, bitmapName);
     }
 
     public void destroy() {
