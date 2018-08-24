@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.lbh.lesson.gles.lesson1.TriangleActivity;
 import com.lbh.lesson.gles.lesson2.TextureActivity;
+import com.lbh.lesson.gles.lesson3.ModelTransitionActivity;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initView() {
         findViewById(R.id.b_triangle).setOnClickListener(this);
         findViewById(R.id.b_texture).setOnClickListener(this);
+        findViewById(R.id.model_transition).setOnClickListener(this);
     }
 
     @Override
@@ -32,6 +34,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.b_texture:
                 startActivity(new Intent(this, TextureActivity.class));
+                break;
+            case R.id.model_transition:
+                startActivity(new Intent(this, ModelTransitionActivity.class));
                 break;
             default:
                 break;

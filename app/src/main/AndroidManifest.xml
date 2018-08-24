@@ -18,6 +18,7 @@
         </activity>
         <activity android:name=".lesson1.TriangleActivity"></activity>
         <activity android:name=".lesson2.TextureActivity"></activity>
+        <activity android:name=".lesson3.ModelTransitionActivity"></activity>
     </application>
 
 </manifest>
