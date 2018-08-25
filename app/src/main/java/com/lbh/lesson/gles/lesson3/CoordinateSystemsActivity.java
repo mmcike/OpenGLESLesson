@@ -32,7 +32,7 @@ public class CoordinateSystemsActivity extends AppCompatActivity {
                     render.setRotation(rotation % 360);
                     glSurfaceView.requestRender();
                     try {
-                        Thread.sleep(30);
+                        Thread.sleep(20);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

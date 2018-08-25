@@ -6,6 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.lbh.lesson.gles.util.CoordinateUtil;
 import com.lbh.lesson.gles.util.ImageUtil;
@@ -231,9 +232,12 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        //开启opengl深度测试
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
         //这里网上很多博客说是设置背景色，其实更严格来说是通过所设置的颜色来清空颜色缓冲区，改变背景色只是其作用之一
-        GLES20.glClearColor(00.0f, 0.0f, 0.0f, 1.0f);//黑色不透明
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         //告知OpenGL所要使用的Program
         GLES20.glUseProgram(mProgramId);
@@ -273,7 +277,7 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
             //如果旋转和平移反过来，那么就会先做平移，然后以屏幕中心为锚点进行旋转，效果不同
             Matrix.translateM(mModelMatrix, 0, CUBE_POSITIONS[i][0], CUBE_POSITIONS[i][1],
                     CUBE_POSITIONS[i][2]);
-            Matrix.rotateM(mModelMatrix, 0, mRotation, 0.0f, 0.0f, 1.0f);
+            Matrix.rotateM(mModelMatrix, 0, mRotation + (i * 20.0f), 1.0f, 0.3f, 0.5f);
             //绑定变换矩阵
             GLES20.glUniformMatrix4fv(mModelMatrixId, 1, false, mModelMatrix, 0);
 
@@ -298,6 +302,9 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
         GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
         //解绑纹理
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+        //关闭opengl深度测试
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
     }
 
     private void loadTexture(int index, String bitmapName) {
