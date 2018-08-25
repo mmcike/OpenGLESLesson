@@ -48,7 +48,7 @@ public class CoordinateUtil {
         return getFloatBuffer(TEXTURE_COORD_VERTICAL_FLIP);
     }
 
-    private static FloatBuffer getFloatBuffer(float[] data) {
+    public static FloatBuffer getFloatBuffer(float[] data) {
         //初始化顶点字节缓冲区，用于存放三角的顶点数据
         ByteBuffer coordBuffer = ByteBuffer.allocateDirect(
                 //(每个浮点数占用4个字节
