@@ -3,8 +3,11 @@ package com.lbh.lesson.gles.lesson3;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.lbh.lesson.gles.R;
+
+import java.util.Random;
 
 public class CoordinateSystemsActivity extends AppCompatActivity {
 
@@ -23,19 +26,22 @@ public class CoordinateSystemsActivity extends AppCompatActivity {
         //该种模式下当需要重绘时需要我们手动调用glSurfaceView.requestRender();
         glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
+        final float[] rotation = new float[10];
+        final long startTime = System.currentTimeMillis();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                int rotation = 0;
                 while (true) {
-                    rotation++;
-                    render.setRotation(rotation % 360);
-                    glSurfaceView.requestRender();
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    for (int i = 0; i < rotation.length; i++) {
+                        float result = 20 * (i + 1);
+                        result =
+                                (float) ((System.currentTimeMillis() - startTime) / 50f
+                                        * Math.toRadians(result));
+                        rotation[i] = result;
                     }
+                    render.setRotation(rotation);
+                    glSurfaceView.requestRender();
+
                 }
             }
         }).start();

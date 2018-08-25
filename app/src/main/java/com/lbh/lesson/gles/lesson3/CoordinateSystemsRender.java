@@ -174,7 +174,7 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
     private float[] mModelMatrix; //变换矩阵
     private float[] mViewMatrix; //变换矩阵
     private float[] mProjectionMatrix; //变换矩阵
-    private int mRotation = 0; //旋转角度
+    private float[] mRotation = new float[10]; //旋转角度
 
     private int mVPWidth = 0;
     private int mVPHeight = 0;
@@ -224,7 +224,7 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
         mVPHeight = height;
     }
 
-    public void setRotation(int rotation) {
+    public void setRotation(float[] rotation) {
         mRotation = rotation;
     }
 
@@ -359,7 +359,7 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
             //如果旋转和平移反过来，那么就会先做平移，然后以屏幕中心为锚点进行旋转，效果不同
             Matrix.translateM(mModelMatrix, 0, CUBE_POSITIONS[i][0], CUBE_POSITIONS[i][1],
                     CUBE_POSITIONS[i][2]);
-            Matrix.rotateM(mModelMatrix, 0, mRotation + (i * 20.0f), 1.0f, 0.3f, 0.5f);
+            Matrix.rotateM(mModelMatrix, 0, mRotation[i], 1.0f, 0.3f, 0.5f);
             //绑定变换矩阵
             GLES20.glUniformMatrix4fv(mModelMatrixId, 1, false, mModelMatrix, 0);
 
