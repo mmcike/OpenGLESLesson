@@ -6,7 +6,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.util.Log;
 
 import com.lbh.lesson.gles.util.CoordinateUtil;
 import com.lbh.lesson.gles.util.ImageUtil;
@@ -36,7 +35,9 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
                     "void main() {" +
                     "//设置最终坐标\n" +
                     "  gl_Position = projection * view * model * vPosition;" +
-                    "  textureCoordinate = vec2(inputTextureCoordinate.x, 1.0 - inputTextureCoordinate.y);\n" +
+                    "  textureCoordinate = vec2(inputTextureCoordinate.x, 1.0 - "
+                    + "inputTextureCoordinate.y);\n"
+                    +
                     "}";
     private static final String FRAGMENT_SHADER =
             "//设置float类型默认精度，顶点着色器默认highp，片元着色器需要用户声明\n" +
@@ -153,7 +154,6 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
             new float[]{-1.3f, 1.0f, -1.5f}
     };
 
-
     private int mProgramId; //GL程序对象句柄
     private int mPositionId; //顶点位置句柄
     private int mTexture; //纹理句柄
@@ -210,8 +210,6 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
         //获取顶点数据
         mVertexBuffer = CoordinateUtil.getFloatBuffer(VERTICES);
         //获取与顶点数据顺序相同的纹理坐标数据
-//        mTextureBuffer = CoordinateUtil.getTextureCoord();
-        //获取与顶点数据顺序垂直翻转的纹理坐标数据
         mTextureBuffer = CoordinateUtil.getFloatBuffer(TEXTURE);
 
         //加载纹理
@@ -232,11 +230,95 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+//        drawFloorPic();
+        drawMultiBox();
+    }
+
+    private void drawFloorPic() {
+        //获取顶点数据
+        mVertexBuffer = CoordinateUtil.getVertexCoord();
+        //获取与顶点数据顺序相同的纹理坐标数据
+        mTextureBuffer = CoordinateUtil.getTextureCoord();
+
         //开启opengl深度测试
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
         //这里网上很多博客说是设置背景色，其实更严格来说是通过所设置的颜色来清空颜色缓冲区，改变背景色只是其作用之一
-        GLES20.glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+        GLES20.glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        //告知OpenGL所要使用的Program
+        GLES20.glUseProgram(mProgramId);
+
+        //启用指向渲染图形所处的顶点数据的句柄
+        GLES20.glEnableVertexAttribArray(mPositionId);
+        //绑定渲染图形所处的顶点数据
+        GLES20.glVertexAttribPointer(mPositionId, CoordinateUtil.PER_COORDINATE_SIZE,
+                GLES20.GL_FLOAT, false,
+                CoordinateUtil.COORDINATE_STRIDE, mVertexBuffer);
+
+        //启用指向纹理坐标数据的句柄
+        GLES20.glEnableVertexAttribArray(mInputTextureCoordinate);
+        //绑定纹理坐标数据
+        GLES20.glVertexAttribPointer(mInputTextureCoordinate, CoordinateUtil.PER_COORDINATE_SIZE,
+                GLES20.GL_FLOAT, false, CoordinateUtil.COORDINATE_STRIDE, mTextureBuffer);
+
+        //激活GL_TEXTURE0，该纹理单元默认激活
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        //绑定纹理数据到GL_TEXTURE0纹理单元上
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[0]);
+        //将纹理对象设置到0号单元上
+        GLES20.glUniform1i(mTexture, 0);
+
+        //激活GL_TEXTURE1，该纹理单元默认激活
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        //绑定纹理数据到GL_TEXTURE1纹理单元上
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId[1]);
+        //将纹理对象设置到1号单元上
+        GLES20.glUniform1i(mTexture2, 1);
+
+        //设置模型变换矩阵
+        Matrix.setIdentityM(mModelMatrix, 0);
+        //代码上的设置顺序与实际想要的顺序需要相反
+        //在世界坐标系中，首先先以原点即屏幕中心为锚点缩放0.5，然后以屏幕中心为锚点旋转角度，最后平移
+        //如果旋转和平移反过来，那么就会先做平移，然后以屏幕中心为锚点进行旋转，效果不同
+        Matrix.translateM(mModelMatrix, 0, mModelMatrix, 0, 0.5f, -0.5f, 0.0f);
+        Matrix.rotateM(mModelMatrix, 0, -75f, 1.0f, 0f, 0f);
+        Matrix.scaleM(mModelMatrix, 0, 0.5f, 0.5f, 1.0f);
+        //绑定变换矩阵
+        GLES20.glUniformMatrix4fv(mModelMatrixId, 1, false, mModelMatrix, 0);
+
+        //设置视图矩阵
+        Matrix.setIdentityM(mViewMatrix, 0);
+        Matrix.translateM(mViewMatrix, 0, 0, 0, -3.0f);
+        GLES20.glUniformMatrix4fv(mViewMatrixId, 1, false, mViewMatrix, 0);
+
+        //设置投影矩阵
+        Matrix.setIdentityM(mProjectionMatrix, 0);
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.0f, (float) mVPWidth / (float) mVPHeight,
+                0.1f, 100.0f);
+        GLES20.glUniformMatrix4fv(mProjectionMatrixId, 1, false, mProjectionMatrix, 0);
+
+        //使用GL_TRIANGLE_FAN方式绘制纹理
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, CoordinateUtil.VERTEX_COUNT);
+
+        //禁用顶点数据对象
+        GLES20.glDisableVertexAttribArray(mPositionId);
+        //禁用纹理坐标数据对象
+        GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
+        //解绑纹理
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+        //关闭opengl深度测试
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+    }
+
+    private void drawMultiBox() {
+        //开启opengl深度测试
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
+        //这里网上很多博客说是设置背景色，其实更严格来说是通过所设置的颜色来清空颜色缓冲区，改变背景色只是其作用之一
+        GLES20.glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         //告知OpenGL所要使用的Program
@@ -292,7 +374,7 @@ public class CoordinateSystemsRender implements GLSurfaceView.Renderer {
                     0.1f, 100.0f);
             GLES20.glUniformMatrix4fv(mProjectionMatrixId, 1, false, mProjectionMatrix, 0);
 
-            //使用GL_TRIANGLE_FAN方式绘制纹理
+            //使用GL_TRIANGLES方式绘制纹理
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 36);
         }
 

@@ -113,7 +113,7 @@ public class ModelTransitionRender implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl10) {
         //这里网上很多博客说是设置背景色，其实更严格来说是通过所设置的颜色来清空颜色缓冲区，改变背景色只是其作用之一
-        GLES20.glClearColor(00.0f, 0.0f, 0.0f, 1.0f);//黑色不透明
+        GLES20.glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         //告知OpenGL所要使用的Program
